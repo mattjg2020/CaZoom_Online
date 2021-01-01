@@ -1,5 +1,5 @@
-var DBName;
 var playerName;
+var DBName;
 var host;
 var inLobby = false;
 var inPreLobby = true;
