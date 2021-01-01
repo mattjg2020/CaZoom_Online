@@ -1,0 +1,136 @@
+*{
+    font-family: sans-serif;
+}
+td{
+    user-select: none;
+}
+
+#body{
+	margin-top: 0;
+	padding: 0;
+	overflow: hidden;
+}
+
+#player_table{
+    border: 2px solid rgb(150, 150, 150);
+    background-color: #ececec;
+    margin-top: 10px;
+    position: absolute;
+    max-height: 98%;
+    overflow: auto;
+    text-align: center;
+}
+
+.playerName {
+    text-decoration: underline;
+    text-align: left;
+    font-size: x-large;
+    padding: 1px;
+}
+
+.playerVP {
+    text-align: right;
+    font-size: x-large;
+    padding: 1px;
+}
+
+.info{
+    vertical-align: middle;
+    padding: 1px;
+    transition: color 0.5s;
+}
+
+.turnButtons{
+    vertical-align: middle;
+    text-align: center;
+    padding: 5px;
+    border-radius: 20%;
+    border: 2px solid;
+}
+
+#buttonRow{
+    border-spacing: 7px;
+}
+
+table{
+    margin: 0 auto;
+}
+
+#nextTurnButton{
+    cursor: pointer;    
+    padding: 5px;
+    border-radius: 20px;
+    margin: 5px;
+    border: 2px solid black;
+    background-color: #ececec;
+}
+
+#buildingCard{
+    position: absolute;
+}
+
+#tradeButton, #makeTradeButton, #yearOfPlentyButton, #monopolyButton, #sevenButton{
+    cursor: pointer;    
+    padding: 5px;
+    border-radius: 20px;
+    margin: 5px;
+    border: 2px solid black;
+    background-color: rgb(221, 169, 169);    
+    text-align: center;
+}
+
+#tradePage, #yearOfPlentyPage, #monopolyPage, #sevenPage{
+    background-color: white;
+    border: 1px solid black;
+    position: fixed;
+    padding: 10px;  
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#loadingMessage{
+    position: fixed; 
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size:xxx-large;
+}
+
+#pageDarken{
+    position: absolute;
+    background-color: #58585885;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.xContainer{
+    width: 100%;
+    text-align: right;
+}
+
+.x{
+    background-color: red;
+    padding: 3px;
+    border: 2px solid black;
+    border-radius: 10%;
+    cursor: pointer;
+}
+
+div{
+    vertical-align: top;
+}
+
+.removePlayer{
+    cursor: pointer;
+}
+
+.messageSpans{
+    top: 0px;
+    transition: all 0.3s;
+    transition-timing-function: ease;
+    display: inline-block;
+    position: relative;
+}

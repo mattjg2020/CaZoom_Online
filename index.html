@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Settlers of CaZoom</title>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.818.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
+    <script src="mattjg2020.github.io/CaZoom_Online/CaZoom_Online.js"></script>
+    <link rel="stylesheet" href='mattjg2020.github.io/CaZoom_Online/CaZoom_Online.css'>
+</head>
+<body id = 'body'>
+	<div id = 'buildingCard' onclick = 'cardClick()'></div>
+	<div id = "preLobby">
+        <H1>Settlers of CaZoom</H1>
+        <input type = 'radio' name = 'preLobby' id = 'joinLobby' onchange="preLobby()" checked = 'true'>Join a Lobby</input><br><br>
+            <div id = 'joinLobbyInputs'>
+                Name: <input type = 'text', id ='join_name' value="player"/><br><br>
+                Lobby Name: <input type = 'text', id ='join_lobbyName' value="CaZoom"/>
+            </div>
+        <input type = 'radio' name = 'preLobby' id = 'makeLobby' onchange="preLobby()">Make a Lobby</input>
+            <div id = 'makeLobbyInputs' style="display: none;">
+                Name: <input type = 'text', id ='make_name' value="Host"/><br><br>
+                Lobby Name: <input type = 'text', id ='make_lobbyName' value="CaZoom"/>
+            </div>
+
+		<br><br><button onclick="attemptLobby()">Join/Create Lobby</button>
+    </div>
+    <div id ='lobby' style = 'visibility: hidden;'>
+        <h1>Settlers of CaZoom</h1>
+        <h3 id = 'lobbyNameDisplay'></h3>
+        <div id = 'lobbyPlayersDisplay'></div>
+        <div id = 'startGameButton'></div>
+    </div>
+    <div id = 'pageDarken' style = 'visibility: hidden'>
+        <h1 id = 'loadingMessage' style = 'visibility: hidden'></h1>
+    </div>
+<!--<button onclick = 'test()'>Test</button>-->
+
+</button>
+</body>
+</html> 
