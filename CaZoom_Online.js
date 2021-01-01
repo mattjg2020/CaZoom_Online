@@ -1,5 +1,5 @@
+var lobbyName;
 var playerName;
-var DBName;
 var host;
 var inLobby = false;
 var inPreLobby = true;
@@ -21,7 +21,7 @@ var dynamodb = new AWS.DynamoDB();
   
 function makeLobby(){
     var params = {
-        TableName : DBName,
+        TableName : lobbyName,
         KeySchema: [
             { AttributeName: "variable", KeyType: "HASH"}
         ],
@@ -51,7 +51,7 @@ function makeLobby(){
 
 function initiateLobby(){
     var params = {
-        TableName : DBName,
+        TableName : lobbyName,
         Item:{
             "variable": "lobbyPlayers",
             "variableData": []
@@ -74,13 +74,10 @@ function finishLobbyInitiation(){
     },{
         "variable": "inLobby",
         "variableData": true
-    },{
-        "variable": "test",
-        "variableData": 'lakdsjflk'
     }]
     for(i in items){
         var params = {
-            TableName : DBName,
+            TableName : lobbyName,
             Item: items[i]
         };
         docClient.put(params, function(err, data) {
@@ -98,7 +95,7 @@ function finishLobbyInitiation(){
 
 function addName(){ 
         var params = {
-            TableName: DBName,
+            TableName: lobbyName,
             Key:{
                 "variable": 'lobbyPlayers',
             },
@@ -133,15 +130,15 @@ function attemptLobby(){
     host = document.getElementById('makeLobby').checked;
     if(host){
         playerName = document.getElementById('make_name').value;
-        DBName = document.getElementById('make_lobbyName').value;
+        lobbyName = document.getElementById('make_lobbyName').value;
     }else{  
         playerName = document.getElementById('join_name').value;
-        DBName = document.getElementById('join_lobbyName').value;
+        lobbyName = document.getElementById('join_lobbyName').value;
     }
 
     if(!validateName(playerName)){
         alert('Please give yourself a valid name \n Names must be 3 characters long \n Names can only contain characters a-z A-Z 0-9 _ . -')
-    }else if(!validateName(DBName) && host){
+    }else if(!validateName(lobbyName) && host){
         alert('Please give your lobby a valid name \n Lobby names must be 3 characters long \n Lobby names can only contain characters a-z A-Z 0-9 _ . -')
     }else{
         if(host){
@@ -170,7 +167,7 @@ function deleteOldTables(){
         }else{
             var tables = data.TableNames;
             for(t in tables){
-                if(tables[t] != DBName){
+                if(tables[t] != lobbyName){
                     deleteIndividualTable(tables, t)
                 }else{}
             }
@@ -211,7 +208,7 @@ window.addEventListener("beforeunload", function(evt) {
         //this means that it only deletes the table if you are past the pregame screen (meaning you've made a new, unique table)
         //deletes the table in the database
         var params = {
-            TableName : DBName
+            TableName : lobbyName
         };
         
         dynamodb.deleteTable(params, function(err, data) {});
@@ -223,7 +220,7 @@ window.addEventListener("beforeunload", function(evt) {
 
 function removePlayerFromLobby(player){   
     var params = {
-        TableName: DBName,
+        TableName: lobbyName,
         Key:{
             "variable": 'lobbyPlayers',
         }
@@ -243,7 +240,7 @@ function removePlayerFromLobby(player){
             }
             
             var params = {
-                TableName: DBName,
+                TableName: lobbyName,
                 Key:{
                     "variable": 'lobbyPlayers',
                 },
@@ -260,11 +257,11 @@ function removePlayerFromLobby(player){
 
 function updateLobbyDisplay(){
     if(inLobby){
-        document.getElementById('lobby').style.visibility = 'visible';
-        document.getElementById('lobbyNameDisplay').innerHTML = 'Lobby: ' + DBName;
+        document.getElementById('lobby').style.display = 'inline';
+        document.getElementById('lobbyNameDisplay').innerHTML = 'Lobby: ' + lobbyName;
 
         var params = {
-            TableName: DBName,
+            TableName: lobbyName,
             Key:{
                 "variable": 'lobbyPlayers'
             }
@@ -295,6 +292,7 @@ function updateLobbyDisplay(){
                 if(host){
                     document.getElementById('lobbyPlayersDisplay').innerHTML += '<br><button onclick = "startGame()">Start Game</button>'; 
                 }
+
                 if(!namePresent){
                     alert('You were kicked out of the lobby')
                 }else{
@@ -302,8 +300,22 @@ function updateLobbyDisplay(){
                 }
             }
         })
+
+        var params = {
+            TableName: lobbyName,
+            Key:{
+                "variable": 'inLobby'
+            }
+        };
+    
+        docClient.get(params, function(err, data) {
+            if(err){
+            }else{
+                inLobby = data.Item.variableData;
+            }
+        })
     }else{
-        document.getElementById('lobby').style.visibility = 'hidden';
+        document.getElementById('lobby').style.display = 'none';
     }
 }
 
@@ -327,4 +339,8 @@ function letterDown(spanNumber, messageLength){
         document.getElementById('letter' + spanNumber).style.top = '0px'
         setTimeout(letterUp, messageLength*190, spanNumber, messageLength)
     }else{}
+}
+
+function startGame(){
+    inLobby = false;
 }
