@@ -4,21 +4,22 @@
 	<title>Settlers of CaZoom</title>
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.818.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
-    <script src="https://mattjg2020.github.io/CaZoom_Online/CaZoom_Online.js"></script>
-    <link rel="stylesheet" href='https://mattjg2020.github.io/CaZoom_Online/CaZoom_Online.css'>
+    <script src="CaZoom_Online.js"></script>
+    <link rel="stylesheet" href='CaZoom_Online.css'>
 </head>
 <body id = 'body'>
 	<div id = 'buildingCard' onclick = 'cardClick()'></div>
 	<div id = "preLobby">
         <H1>Settlers of CaZoom</H1>
-        <input type = 'radio' name = 'preLobby' id = 'joinLobby' onchange="preLobby()" checked = 'true'>Join a Lobby</input><br><br>
-            <div id = 'joinLobbyInputs'>
-                Name: <input type = 'text', id ='join_name' value="player"/><br><br>
+        <input type = 'radio' name = 'preLobby' id = 'joinLobby' onchange="preLobby()" checked = 'true'>Join a Lobby</input>
+            <div id = 'joinLobbyInputs' style="margin-left: 25px;">
+                Name: <input type = 'text', id ='join_name' value="Player"/><br>
                 Lobby Name: <input type = 'text', id ='join_lobbyName' value="CaZoom"/>
             </div>
-        <input type = 'radio' name = 'preLobby' id = 'makeLobby' onchange="preLobby()">Make a Lobby</input>
-            <div id = 'makeLobbyInputs' style="display: none;">
-                Name: <input type = 'text', id ='make_name' value="Host"/><br><br>
+        <br>
+		<input type = 'radio' name = 'preLobby' id = 'makeLobby' onchange="preLobby()">Make a Lobby</input>
+            <div id = 'makeLobbyInputs' style="display: none; margin-left: 25px;">
+                Name: <input type = 'text', id ='make_name' value="Host"/><br>
                 Lobby Name: <input type = 'text', id ='make_lobbyName' value="CaZoom"/>
             </div>
 
@@ -27,12 +28,119 @@
     <div id ='lobby' style = 'display: none;'>
         <h1>Settlers of CaZoom</h1>
         <h3 id = 'lobbyNameDisplay'></h3>
-        <div id = 'lobbyPlayersDisplay'></div>
+        <b style = 'text-decoration: underline;'>Players: </b>
+        <div id = 'lobbyPlayersDisplay' style = 'margin-left: 25px;'></div>
+        <br>
+        <div id = "gameSettings" style = 'display: none;'>
+            <b style="text-decoration: underline;">Game Settings: </b><br>    
+            <div  style="margin-left: 25px;">
+                Custom Map: <input type = 'checkbox', id="customBoardCheckBox" onclick="pregameBoxes()"/>
+            </div>
+            <div id = 'customSettings'  style = "margin-left: 50px; display: none;">
+                X: <input type="number" id="customX" min="1" max="6" value="3" onKeyDown="return false" ><br>
+                Y: <input type="number" id="customY" min="1" max="6" value="3" onKeyDown="return false"><br>
+                Z: <input type="number" id="customZ" min="1" max="6" value="5"" onKeyDown="return false">
+            </div>
+            
+        </div>
+        <div style="margin-left: 25px;">
+            Background Color:
+            <select id = 'bgColorSelect'>
+                <option value = '#fafafa'>White</option>
+                <option value = '#deebff'>Blue</option>
+                <option value = '#888888'>Gray</option>
+                <option value = '#111111'>Black</option>
+            </select>
+        </div>
+        
         <div id = 'startGameButton'></div>
     </div>
-    <div id = 'pageDarken' style = 'visibility: hidden'>
+
+
+	<div id = 'player_table' style = 'display: none;'>
+		<div id = 'tradeButton' onclick = "tradeButtonClick()">Make a Trade</div>
+		<!--<button onclick = 'test()'>test</button>-->
+		
+    </div>
+
+    <div id = 'pageDarken' style = 'visibility: hidden'></div>
         <h1 id = 'loadingMessage' style = 'visibility: hidden'></h1>
     </div>
+    
+    <div id = 'tradePage' style = 'visibility: hidden'>
+		<div class = "xContainer"><span onclick = 'closeTradePage()' class = 'x'>X</span></div><br>
+		Trade with:
+		<select id = 'people' onchange="updateTradePage('both')"></select><br><br>
+
+		<input type ="number" id = "traderNumber" onchange="changePortNumberForTrade()" min="0" max = '9' value="0" onKeyDown="return false"/>
+		of my
+		<select id="traderTypes" onchange="updateTradePage('traderNum')">
+			<option value = 'wool'>wool</option>
+			<option value = 'wood'>wood</option>
+			<option value = 'grain'>grain</option>
+			<option value = 'brick'>brick</option>
+			<option value = 'ore'>ore</option>
+		</select><br><br>
+
+		for
+		<input type ="number" id = "tradeeNumber" min="0" max = '9' value="0" onKeyDown="return false"/>
+		<select id="tradeeTypes" onchange="updateTradePage('tradeeNum')">
+			<option value = 'grain'>grain</option>
+			<option value = 'wood'>wood</option>
+			<option value = 'wool'>wool</option>
+			<option value = 'ore'>ore</option>
+			<option value = 'brick'>brick</option>
+		</select>
+		<div id = 'makeTradeButton' onclick="makeTrade()">Make Trade</div>
+	</div>
+
+	<div id = 'yearOfPlentyPage' style = 'visibility: hidden'>
+		<div class = "xContainer"><span onclick = 'closeYOPPage()' class = 'x'>X</span></div><br>
+		Item one:
+		<select id="yearOfPlentyOne">
+			<option value = 'grain'>grain</option>
+			<option value = 'wood'>wood</option>
+			<option value = 'wool'>wool</option>
+			<option value = 'ore'>ore</option>
+			<option value = 'brick'>brick</option>
+		</select><br><br>
+
+		Item two:
+		<select id="yearOfPlentyTwo">
+			<option value = 'grain'>grain</option>
+			<option value = 'wood'>wood</option>
+			<option value = 'wool'>wool</option>
+			<option value = 'ore'>ore</option>
+			<option value = 'brick'>brick</option>
+		</select>
+		<div id = 'yearOfPlentyButton' onclick="yearOfPlentyConfirm()">Get Resources</div>
+	</div>
+
+
+	<div id = 'monopolyPage' style = 'visibility: hidden'>
+		<div class = "xContainer"><span onclick = 'closeMonopolyPage()' class = 'x'>X</span></div><br>
+		What do you want to collect?<br>
+		<div style = 'text-align: center'>
+			<select id="monopolyItem">
+				<option value = 'grain'>grain</option>
+				<option value = 'wood'>wood</option>
+				<option value = 'wool'>wool</option>
+				<option value = 'ore'>ore</option>
+				<option value = 'brick'>brick</option>
+			</select>
+		</div>
+		<div id = 'monopolyButton' onclick="monopolyConfirm()">Get Resources</div>
+	</div>
+
+	<div id = 'sevenPage' style = 'visibility: hidden'>
+		What do you want a card from?<br>
+		<div style = 'text-align: center'>
+			<select id="sevenSelect">
+			</select>
+		</div>
+		<div id = 'sevenButton' onclick="sevenConfirm()">Get Resources</div>
+    </div>
+
 <!--<button onclick = 'test()'>Test</button>-->
 
 </button>
