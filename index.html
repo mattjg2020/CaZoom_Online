@@ -13,17 +13,23 @@
         <H1>Settlers of CaZoom</H1>
         <input type = 'radio' name = 'preLobby' id = 'joinLobby' onchange="preLobby()" checked = 'true'>Join a Lobby</input>
             <div id = 'joinLobbyInputs' style="margin-left: 25px;">
-                Name: <input type = 'text', id ='join_name' value="Player"/><br>
-                Lobby Name: <input type = 'text', id ='join_lobbyName' value="CaZoom"/>
+                Name: <input type = 'text', id ='join_name'/><br>
+                Lobby Name: <input type = 'text', id ='join_lobbyName'/>
             </div>
         <br>
+		<input type = 'radio' name = 'preLobby' id = 'rejoinGame' onchange="preLobby()">Rejoin a Game</input>
+            <div id = 'JoinGameInputs' style="display: none; margin-left: 25px;">
+                Name: <input type = 'text', id ='rejoin_name'/><br>
+                Lobby Name: <input type = 'text', id ='rejoin_lobbyName'/>
+			</div>
+		<br>
 		<input type = 'radio' name = 'preLobby' id = 'makeLobby' onchange="preLobby()">Make a Lobby</input>
             <div id = 'makeLobbyInputs' style="display: none; margin-left: 25px;">
-                Name: <input type = 'text', id ='make_name' value="Host"/><br>
-                Lobby Name: <input type = 'text', id ='make_lobbyName' value="CaZoom"/>
+                Name: <input type = 'text', id ='make_name'/><br>
+                Lobby Name: <input type = 'text', id ='make_lobbyName'/>
             </div>
 
-		<br><br><button onclick="attemptLobby()">Join/Create Lobby</button>
+		<br><br><button onclick="attemptLobby()">Go to Lobby/Game</button>
     </div>
     <div id ='lobby' style = 'display: none;'>
         <h1>Settlers of CaZoom</h1>
@@ -142,7 +148,5 @@
     </div>
 
 <!--<button onclick = 'test()'>Test</button>-->
-
-</button>
 </body>
 </html> 
