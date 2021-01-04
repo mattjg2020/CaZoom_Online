@@ -2,10 +2,13 @@
     var mapX = 0;
     var mapY = 0;
     var mapZ = 0;
-    var mapR = 0;
+	var mapR = 0;
+	var hostMapR;
     var showMap = false;
     var vertices = {};
-    var hexagon = {};
+	var hexagon = {};
+	var correctPointsVertices = {};
+	var correctPointsHexagon = {};
     var dotColor = 'black';
     var mapType = '';
     var normalNums = {numbers: [0,2,3,3,4,4,5,5,6,6,8,8,9,9,10,10,11,11,12], dots: [0,1,2,2,3,3,4,4,5,5,5,5,4,4,3,3,2,2,1]};
@@ -449,7 +452,7 @@ function updateLobbyDisplay(){
 }
 
 function initiateGameForPlayer(){
-	var thingsToUpdate = ['players', 'vertices', 'hexagon', 'mapType', 'devCards', 'roads', 'numOfTurns', 'turn', 'dice1', 'dice2', 'largestArmy', 'longestRoad', 'mapX', 'mapY', 'mapZ']
+	var thingsToUpdate = ['players', 'vertices', 'hexagon', 'mapType', 'devCards', 'roads', 'numOfTurns', 'turn', 'dice1', 'dice2', 'largestArmy', 'longestRoad', 'mapX', 'mapY', 'mapZ', 'hostMapR']
 	var stringForParams = ''
 	for(i in thingsToUpdate){
 		stringForParams += "{'variable': '" + thingsToUpdate[i] + "'},"
@@ -483,6 +486,8 @@ function initiateGameForPlayer(){
 					playerNumber = i;
 				}else{}
 			}
+			makeCorrectPoints();
+			correctPoints();
 			setup();
 			makePlayerDisplay();
 			updateResourceDisplay();
@@ -517,7 +522,7 @@ function updateLocalVariables(){
 			for(i in data.Responses[lobbyName]){
 				eval(data.Responses[lobbyName][i].variable + '= data.Responses[lobbyName][i].variableData')
 			}
-			console.log(players[1].wool)
+			correctPoints();
 			updateResourceDisplay();
 			if(turn != playerNumber){
 				setTimeout(checkTurnChange, 5000);
@@ -527,7 +532,8 @@ function updateLocalVariables(){
 }
 
 function initialWriteDBVariables(){
-	var thingsToWrite = ['players', 'vertices', 'hexagon', 'devCards', 'mapType', 'beginingPlacement', 'robberPlacement', 'roads', 'numOfTurns', 'turn', 'dice1', 'dice2', 'largestArmy', 'longestRoad', 'mapX', 'mapY', 'mapZ']
+	hostMapR = mapR;
+	var thingsToWrite = ['players', 'vertices', 'hexagon', 'devCards', 'mapType', 'beginingPlacement', 'robberPlacement', 'roads', 'numOfTurns', 'turn', 'dice1', 'dice2', 'largestArmy', 'longestRoad', 'mapX', 'mapY', 'mapZ', 'hostMapR']
 	var items = []
 	for(i in thingsToWrite){
 		items.push({
@@ -578,6 +584,26 @@ function updateDBVariables(){
     }
 }
 
+function makeCorrectPoints(){
+	for(i in vertices){
+		correctPointsVertices[i] = {'x': vertices[i].x*(mapR/hostMapR), 'y': vertices[i].y*(mapR/hostMapR)}
+	}
+	for(i in hexagon){
+		correctPointsHexagon[i] = {'x': hexagon[i].x*(mapR/hostMapR), 'y': hexagon[i].y*(mapR/hostMapR)}
+	}
+}
+
+function correctPoints(){
+	for(i in vertices){
+		vertices[i].x = correctPointsVertices[i].x;
+		vertices[i].y = correctPointsVertices[i].y;
+	}
+	for(i in hexagon){
+		hexagon[i].x = correctPointsHexagon[i].x;
+		hexagon[i].y = correctPointsHexagon[i].y;
+	}
+}
+
 function creatingLoadingMessage(){
     var message = 'Loading...'
     for(i = 0; i < message.length; i++){
@@ -608,39 +634,43 @@ function resetColors(){
 }
 
 function checkTurnChange(){
-    var params = {
-        TableName: lobbyName,
-        Key:{
-            "variable": 'turn'
-        }
-    };
+	if(beginingPlacement){
+		var thingsToCheck = ['beginingPlacement', 'turn']
+	}else{
+		var thingsToCheck = ['turn']
+	}
 
-    docClient.get(params, function(err, data) {
+	var stringForParams = ''
+	for(i in thingsToCheck){
+		stringForParams += "{'variable': '" + thingsToCheck[i] + "'},"
+	}
+	eval(`
+	var params = {
+		RequestItems: {
+			` + lobbyName + ` : {
+			Keys: [` + stringForParams + `]
+		  }
+		}
+	  };
+	`)
+
+	docClient.batchGet(params, function(err, data) {
         if(err){
         }else{
-            if(data.Item.variableData != turn){
-				updateLocalVariables();
-            }else{
-				if(beginingPlacement){
-					var params = {
-						TableName: lobbyName,
-						Key:{
-							"variable": 'beginingPlacement'
-						}
-					};
-				
-					docClient.get(params, function(err, data) {
-						if(err){
-						}else if(data.Item.variableData == false){
-							updateLocalVariables();
-						}else{
-							setTimeout(checkTurnChange, 1500);
-						}
-					})
-				}else if(data.Item.variableData == players.length || data.Item.variableData == playerNumber - 1){
-					setTimeout(checkTurnChange, 1500)
+			for(i in data.Responses[lobbyName]){
+				if(data.Responses[lobbyName][i].variable == 'turn'){
+					if(data.Responses[lobbyName][i].variableData != turn){
+						updateLocalVariables();
+					}else if(data.Responses[lobbyName][i].variableData == players.length || data.Responses[lobbyName][i].variableData == playerNumber - 1){
+						setTimeout(checkTurnChange, 1500)
+					}else{
+						setTimeout(checkTurnChange, 5000)
+					}
 				}else{
-					setTimeout(checkTurnChange, 10000)
+					if(data.Responses[lobbyName][i].variableData == false){
+						//if begining placement ends
+						updateLocalVariables();
+					}else{}
 				}
 			}
         }
@@ -773,6 +803,12 @@ function gameSetup() {
 			makePlayerDisplay();
 			updateResourceDisplay();
 			initialWriteDBVariables();
+			for(i in vertices){
+				correctPointsVertices[i] = {'x': vertices[i].x, 'y': vertices[i].y}
+			}
+			for(i in hexagon){
+				correctPointsHexagon[i] = {'x': hexagon[i].x, 'y': hexagon[i].y}
+			}
         }
     })
 }
