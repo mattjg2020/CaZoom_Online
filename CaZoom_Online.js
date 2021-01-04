@@ -171,7 +171,7 @@ function initiateLobby(){
 			console.log(err)
 			setTimeout(initiateLobby, 1000);
 		}else{
-			//console. clear() 
+			console. clear() 
 			document.getElementById('pageDarken').style.visibility = 'hidden';
 			document.getElementById('loadingMessage').style.display = 'none';
 			addName();
@@ -489,6 +489,7 @@ function initiateGameForPlayer(){
 			if(turn != playerNumber){
 				checkTurnChange();
 			}else{}
+			createBuildingCard();
 		}
 	})
 }
@@ -516,6 +517,7 @@ function updateLocalVariables(){
 			for(i in data.Responses[lobbyName]){
 				eval(data.Responses[lobbyName][i].variable + '= data.Responses[lobbyName][i].variableData')
 			}
+			console.log(players[1].wool)
 			updateResourceDisplay();
 			if(turn != playerNumber){
 				setTimeout(checkTurnChange, 5000);
@@ -671,7 +673,6 @@ function startGame(){
 //calls create map, sets up players[], and sets up html stuff on the side of the screen
 //need to fix: 398, 399, 535
 function gameSetup() {
-    createBuildingCard();
 	document.getElementById('body').style.backgroundColor = document.getElementById('bgColorSelect').value;
 
 //creates players array
@@ -767,7 +768,8 @@ function gameSetup() {
                 shuffledCard = devCards[i];
                 devCards.splice(i, 1);
                 devCards.splice(randomNum, 0, shuffledCard)
-            }
+			}
+			createBuildingCard();
 			makePlayerDisplay();
 			updateResourceDisplay();
 			initialWriteDBVariables();
@@ -796,7 +798,6 @@ function nextTurn(){
 				if(turn == 0){
 					beginingPlacement = false;
 					giveResourcesOnBeginingPlacement();
-					updateDBVariables();
 					numOfTurns++;
 				}else{
 					turn--;
