@@ -7,8 +7,10 @@
     var showMap = false;
     var vertices = {};
 	var hexagon = {};
+    var roads = {};
 	var correctPointsVertices = {};
 	var correctPointsHexagon = {};
+	var correctPointsRoads = {};
     var dotColor = 'black';
     var mapType = '';
     var normalNums = {numbers: [0,2,3,3,4,4,5,5,6,6,8,8,9,9,10,10,11,11,12], dots: [0,1,2,2,3,3,4,4,5,5,5,5,4,4,3,3,2,2,1]};
@@ -31,7 +33,6 @@
     var clickDistance; 	
     var mapMarginTop;
     var mapMarginLeft;
-    var roads = {};
 	var settlementWidth = 20;
 	var portTypes = ['any','wool','ore','wood','grain','brick'];
     var portSpacing = [true,true,false,true,true,false,false,true,true,false];
@@ -249,10 +250,16 @@ function preLobby(){
     if(document.getElementById('makeLobby').checked){
         document.getElementById('joinLobbyInputs').style.display = 'none';
         document.getElementById('makeLobbyInputs').style.display = 'block';
+        document.getElementById('JoinGameInputs').style.display = 'none';
     }else if(document.getElementById('joinLobby').checked){
         document.getElementById('joinLobbyInputs').style.display = 'block';
         document.getElementById('makeLobbyInputs').style.display = 'none';
-    }else{}
+        document.getElementById('JoinGameInputs').style.display = 'none';
+    }else{
+        document.getElementById('JoinGameInputs').style.display = 'block';
+        document.getElementById('joinLobbyInputs').style.display = 'none';
+        document.getElementById('makeLobbyInputs').style.display = 'none';
+	}
 }
 
 function attemptLobby(){
@@ -260,6 +267,9 @@ function attemptLobby(){
     if(host){
         playerName = document.getElementById('make_name').value;
         lobbyName = document.getElementById('make_lobbyName').value;
+    }else if(document.getElementById('rejoinGame').checked){  
+        playerName = document.getElementById('rejoin_name').value;
+        lobbyName = document.getElementById('rejoin_lobbyName').value;
     }else{  
         playerName = document.getElementById('join_name').value;
         lobbyName = document.getElementById('join_lobbyName').value;
@@ -272,7 +282,9 @@ function attemptLobby(){
     }else{
         if(host){
             makeLobby();
-        }else{
+        }else if(document.getElementById('rejoinGame').checked){
+			rejoinGame();
+		}else{
             addName();
         }
     }
@@ -330,17 +342,18 @@ function deleteIndividualTable(tables, t){
 
 window.addEventListener("beforeunload", function(evt) {
     if(host && !inPreLobby){
-        //the check for the visibility to make sure that you don't close out someone else's game if the lobby name you use is taken
-        //this means that it only deletes the table if you are past the pregame screen (meaning you've made a new, unique table)
-        //deletes the table in the database
-        var params = {
-            TableName : lobbyName
-        };
-        
-        dynamodb.deleteTable(params, function(err, data) {});
+		if(document.getElementById('pageDarken').style.visibility == 'visible' || inLobby){
+			//this should make it delete the lobby if you're past the prelobby screen but haven't started the game yet
+			//deletes the table in the database
+			var params = {
+				TableName : lobbyName
+			};
+			
+			dynamodb.deleteTable(params, function(err, data) {});
 
-        evt.returnValue = ''
-        return null;
+			evt.returnValue = ''
+			return null;
+		}else{}
     }else{}    
 });
 
@@ -381,6 +394,60 @@ function removePlayerFromLobby(player){
     });   
 }
 
+function rejoinGame(){
+	var thingsToCheck = ['lobbyPlayers', 'hostName', 'inLobby']
+
+	var stringForParams = ''
+	for(i in thingsToCheck){
+		stringForParams += "{'variable': '" + thingsToCheck[i] + "'},"
+	}
+	eval(`
+	var params = {
+		RequestItems: {
+			` + lobbyName + ` : {
+			Keys: [` + stringForParams + `]
+		  }
+		}
+	  };
+	`)
+
+	docClient.batchGet(params, function(err, data) {
+        if(err){
+			alert('Something went wrong. The host may have kicked you from the game, the game may have been deleted, or the game you tried to join may not exist.')
+        }else{
+			var playerInLobby = false;
+			for(i in data.Responses[lobbyName]){
+				if(data.Responses[lobbyName][i].variable == 'inLobby'){
+					if(data.Responses[lobbyName][i].variableData == true){
+						alert('This game has not started yet. Please use "Join a Lobby" instead.')
+						return;
+					}else{}
+				}
+				if(data.Responses[lobbyName][i].variable == 'lobbyPlayers'){
+					var playersInLobby = data.Responses[lobbyName][i].variableData;
+					for(j in playersInLobby){
+						if(playersInLobby[j] == playerName){
+							playerInLobby = true;
+						}else{}
+					}
+				}else{
+					if(data.Responses[lobbyName][i].variableData == playerName){
+						host = true;
+					}else{}
+				}
+			}
+
+			if(playerInLobby){
+				document.getElementById('preLobby').style.display = 'none';
+				inPreLobby = false;
+				initiateGameForPlayer();
+			}else{
+				alert('The name you entered was not a player in the game. Please try again.')
+			}
+		}
+	})
+}
+
 //this also calls initiateGameForPlayer() when appropriate
 function updateLobbyDisplay(){
     if(inLobby){
@@ -397,7 +464,8 @@ function updateLobbyDisplay(){
         docClient.get(params, function(err, data) {
             if (err) {
                 console.log("Unable to read item: " + "\n" + JSON.stringify(err, undefined, 2));
-                alert('The lobby was closed');
+				alert('The lobby was closed');
+				document.getElementById('body').innerHTML = '<H1>Settlers of CaZoom</H1><div>The lobby was closed.'
             }else{
                 var lobbyPlayersArray = data.Item.variableData;
                 
@@ -416,14 +484,15 @@ function updateLobbyDisplay(){
                     if(lobbyPlayersArray[i] == playerName){
                         namePresent = true;
                     }else{}
-                }
+				}
+				
                 if(host){
                     document.getElementById('gameSettings').style.display = 'inline';
                     document.getElementById('startGameButton').innerHTML = '<br><button onclick = "startGame()">Start Game</button>'; 
                 }
 
                 if(!namePresent){
-                    alert('You were kicked out of the lobby')
+					alert('You were kicked out of the lobby')
                 }else{
                     setTimeout(updateLobbyDisplay, 1000)
                 }
@@ -533,7 +602,8 @@ function updateLocalVariables(){
 
 function initialWriteDBVariables(){
 	hostMapR = mapR;
-	var thingsToWrite = ['players', 'vertices', 'hexagon', 'devCards', 'mapType', 'beginingPlacement', 'robberPlacement', 'roads', 'numOfTurns', 'turn', 'dice1', 'dice2', 'largestArmy', 'longestRoad', 'mapX', 'mapY', 'mapZ', 'hostMapR']
+	hostName = playerName;
+	var thingsToWrite = ['players', 'vertices', 'hexagon', 'devCards', 'mapType', 'beginingPlacement', 'robberPlacement', 'roads', 'numOfTurns', 'turn', 'dice1', 'dice2', 'largestArmy', 'longestRoad', 'mapX', 'mapY', 'mapZ', 'hostMapR', 'hostName']
 	var items = []
 	for(i in thingsToWrite){
 		items.push({
@@ -591,6 +661,14 @@ function makeCorrectPoints(){
 	for(i in hexagon){
 		correctPointsHexagon[i] = {'x': hexagon[i].x*(mapR/hostMapR), 'y': hexagon[i].y*(mapR/hostMapR)}
 	}
+	for(i in roads){
+		correctPointsRoads[i] = {
+			'x1': roads[i].x1*(mapR/hostMapR),
+			'x2': roads[i].x2*(mapR/hostMapR),
+			'y1': roads[i].y1*(mapR/hostMapR),
+			'y2': roads[i].y2*(mapR/hostMapR),
+		}
+	}
 }
 
 function correctPoints(){
@@ -601,6 +679,12 @@ function correctPoints(){
 	for(i in hexagon){
 		hexagon[i].x = correctPointsHexagon[i].x;
 		hexagon[i].y = correctPointsHexagon[i].y;
+	}
+	for(i in roads){
+		roads[i].x1 = correctPointsRoads[i].x1;
+		roads[i].x2 = correctPointsRoads[i].x2;
+		roads[i].y1 = correctPointsRoads[i].y1;
+		roads[i].y2 = correctPointsRoads[i].y2;
 	}
 }
 
@@ -701,7 +785,6 @@ function startGame(){
 }
 
 //calls create map, sets up players[], and sets up html stuff on the side of the screen
-//need to fix: 398, 399, 535
 function gameSetup() {
 	document.getElementById('body').style.backgroundColor = document.getElementById('bgColorSelect').value;
 
@@ -809,6 +892,14 @@ function gameSetup() {
 			for(i in hexagon){
 				correctPointsHexagon[i] = {'x': hexagon[i].x, 'y': hexagon[i].y}
 			}
+			for(i in roads){
+				correctPointsRoads[i] = {
+					'x1': roads[i].x1,
+					'x2': roads[i].x2,
+					'y1': roads[i].y1,
+					'y2': roads[i].y2,
+				}
+			}
         }
     })
 }
@@ -857,7 +948,7 @@ function nextTurn(){
 		}
 
 		updateDBVariables();
-		setTimeout(checkTurnChange, 10000);
+		setTimeout(checkTurnChange, 5000);
 	}else{
 		alert('Place the robber first')
 	}
@@ -934,6 +1025,7 @@ function updateResourceDisplay(){
 
 
 	if(playerNumber == turn){
+		document.getElementById('nextTurnButton').innerHTML = 'Next Turn';
 		document.getElementById('nextTurnButton').style.visibility = 'visible';
 	}else{
 		document.getElementById('nextTurnButton').style.visibility = 'hidden';
@@ -1684,7 +1776,14 @@ function sevenTakeResources(){
 	document.getElementById('pageDarken').style.visibility = 'visible';
 	document.getElementById('sevenSelect').innerHTML = '';
 	for(i in players){
-		if(i != turn){
+		var haveAnything = false;
+		for(j in hexagonTypes){
+			if(players[i][hexagonTypes[j]] > 0){
+				haveAnything = true;
+			}else{}
+		}
+		
+		if(i != turn && haveAnything){
 			document.getElementById('sevenSelect').innerHTML += `
 			<option value = '` + i + `'>` + players[i].name + `</option>`
 		}else{}
@@ -2616,6 +2715,39 @@ function create_water(x,y,delX,delY,check1,check2,check1Image,check2Image){
 		}
 	}else{
 		image(water, vertex.x + delX, vertex.y + delY, width, mapR*2);
+	}
+}
+
+function manual(name, resource, amount){
+	var goodName = false;
+	var goodResource = false;
+	for(i in players){
+		if(players[i].name == name){
+			goodName = true;
+		}else{}
+	}
+	for(i in hexagonTypes){
+		if(hexagonTypes[i] == resource){
+			goodResource = true;
+		}else{}
+	}
+
+	if(!goodName){
+		console.error('The name you entered was not found.')
+		console.error("Follow this format: manual('Joe', 'wool', -2)")
+	}else if(!goodResource){
+		console.error('Please enter a valid resource. Resource must be wood, wool, grain, brick, or ore.')
+		console.error("Follow this format: manual('Joe', 'wool', -2)")
+	}else if(typeof amount != 'number'){
+		console.error('Please enter a valid amount. Amount must be a number.')
+		console.error("Follow this format: manual('Joe', 'wool', -2)")
+	}else{
+		for(i in players){
+			if(players[i].name == name){
+				players[i][resource] += Math.floor(amount);
+			}else{}
+		}
+		updateResourceDisplay();
 	}
 }
 
