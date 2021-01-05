@@ -521,7 +521,7 @@ function updateLobbyDisplay(){
 }
 
 function initiateGameForPlayer(){
-	var thingsToUpdate = ['players', 'vertices', 'hexagon', 'mapType', 'devCards', 'roads', 'numOfTurns', 'turn', 'dice1', 'dice2', 'largestArmy', 'longestRoad', 'mapX', 'mapY', 'mapZ', 'hostMapR']
+	var thingsToUpdate = ['players', 'vertices', 'hexagon', 'mapType', 'beginingPlacement', 'devCards', 'roads', 'numOfTurns', 'turn', 'dice1', 'dice2', 'largestArmy', 'longestRoad', 'mapX', 'mapY', 'mapZ', 'hostMapR']
 	var stringForParams = ''
 	for(i in thingsToUpdate){
 		stringForParams += "{'variable': '" + thingsToUpdate[i] + "'},"
@@ -810,7 +810,7 @@ function gameSetup() {
 				mapR = 1/(((mapY + mapZ + (2/3))*1.5)/windowHeight);
 				clickDistance = mapR/4;
                 createmap()
-            }else if(nameInputs.length >= 4){
+            }else if(nameInputs.length > 4){
 				mapType = 'extension';
 				mapX = 4;
 				mapY = 4;
@@ -1915,9 +1915,9 @@ function giveResourcesOnBeginingPlacement(){
 		for(j in vertices){
 			var distance = Math.sqrt(Math.pow((vertices[j].x - hexagon[i].x), 2) + Math.pow((vertices[j].y - hexagon[i].y), 2))
 			if (distance < mapR*1.01){
-				if(vertices[j].pieceStatus == 'settlement'){
+				if(vertices[j].pieceStatus == 'settlement' && hexagon[i].type != 'desert'){
 					eval('players[vertices[j].ownership].' + hexagon[i].type + '++');
-				}else if(vertices[j].pieceStatus == 'city'){
+				}else if(vertices[j].pieceStatus == 'city' && hexagon[i].type != 'desert'){
 					eval('players[vertices[j].ownership].' + hexagon[i].type + '+= 2');
 				}else{}
 			}else{}
