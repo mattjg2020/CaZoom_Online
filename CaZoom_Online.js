@@ -2,15 +2,15 @@
     var mapX = 0;
     var mapY = 0;
     var mapZ = 0;
-    var mapR = 0;
-    var hostMapR;
+	var mapR = 0;
+	var hostMapR;
     var showMap = false;
     var vertices = {};
-    var hexagon = {};
+	var hexagon = {};
     var roads = {};
-    var correctPointsVertices = {};
-    var correctPointsHexagon = {};
-    var correctPointsRoads = {};
+	var correctPointsVertices = {};
+	var correctPointsHexagon = {};
+	var correctPointsRoads = {};
     var dotColor = 'black';
     var mapType = '';
     var normalNums = {numbers: [0,2,3,3,4,4,5,5,6,6,8,8,9,9,10,10,11,11,12], dots: [0,1,2,2,3,3,4,4,5,5,5,5,4,4,3,3,2,2,1]};
@@ -26,33 +26,33 @@
     var host;
     var inLobby = false;
     var inPreLobby = true;
-    var turn = 0;
-    var playerNumber;
+	var turn = 0;
+	var playerNumber;
     var names = [];
     var players = [];
     var clickDistance; 	
     var mapMarginTop;
     var mapMarginLeft;
-    var settlementWidth = 20;
-    var portTypes = ['any','wool','ore','wood','grain','brick'];
+	var settlementWidth = 20;
+	var portTypes = ['any','wool','ore','wood','grain','brick'];
     var portSpacing = [true,true,false,true,true,false,false,true,true,false];
     var beginingPlacement = true;
-    var numOfTurns = 1;
-    var placedRoad = false;
-    var placedSettlement = false;
-    var undoList = [];
-    var dice1 = 6;
+	var numOfTurns = 1;
+	var placedRoad = false;
+	var placedSettlement = false;
+	var undoList = [];
+	var dice1 = 6;
     var dice2 = 6;
-    var robberPlacement = false;
-    var freeRoads = 0;
-    var largestArmy = 2;
-    var longestRoad = 4;
+	var robberPlacement = false;
+	var freeRoads = 0;
+	var largestArmy = 2;
+	var longestRoad = 4;
     var devCards = ['knight', 'knight', 'knight', 'knight', 'knight', 'knight', 'knight', 'knight', 'knight', 'knight', 'knight', 'knight', 'knight', 'knight', 
     'VP', 'VP', 'VP', 'VP', 'VP', 'roadBuilding', 'roadBuilding', 'yearOfPlenty', 'yearOfPlenty', 'monopoly', 'monopoly']
-    var devCardDisplayName = {'knight': 'Knight: ', 'yearOfPlenty': 'Year of Plenty:', 'VP': 'Victory Point: ', 'roadBuilding': 'Road Building: ', 'monopoly': 'Monopoly: '}
+	var devCardDisplayName = {'knight': 'Knight: ', 'yearOfPlenty': 'Year of Plenty:', 'VP': 'Victory Point: ', 'roadBuilding': 'Road Building: ', 'monopoly': 'Monopoly: '}
 
 //image sources
-    var repository = 'https://mattjg2020.github.io/CaZoom_Online/'
+    var repository = 'https://mattjg2020.github.io/CaZoom/'
     var brick = repository + 'brick.png';
     var desert = repository + 'desert.png';
     var grain = repository + 'grain.png';
@@ -83,21 +83,21 @@
     var devCard_icon = repository + 'devCard_icon.png';
 
 //Variables that can change	var mapMarginTop = 50;
-    var waterWidth = 30;
-    var dotSpacing = 5;
-    var dotWeight = 3;
-    var luckyColor = '#cc0000';
-    var tableMarginLeft = 20;
-    var iconSize = 0.45;
-    var roadWidth = 12;
-    var availableColor = '#dbdbdb';
-    var colors = ['#ff2e2e', '#2969ff', '#3f663e', '#7a4e00', '#000000', '#7c00ba', '#ff9900', '#32f0e0', '#e3e300', '#84ff00', '#ff00e1', '#9c0000'];
-    var secondaryColors = ['#ff8a8a', '#a8c7ff', '#5d945c', '#b07c20', '#919191', '#cb9de3', '#ffc56e', '#cffffb', '#fafaa7', '#d9ffb0', '#fca7f2', '#b53e3e'];
-    var undoButtonRadius = 30;
-    var diceMargin = 7;
-    var diceWidth = 50;
-    var diceCornerRadius = 5;
-    var diceDotSize = 9;
+	var waterWidth = 30;
+	var dotSpacing = 5;
+	var dotWeight = 3;
+	var luckyColor = '#cc0000';
+	var tableMarginLeft = 20;
+	var iconSize = 0.45;
+	var roadWidth = 12;
+	var availableColor = '#dbdbdb';
+	var colors = ['#ff2e2e', '#2969ff', '#3f663e', '#7a4e00', '#000000', '#7c00ba', '#ff9900', '#32f0e0', '#e3e300', '#84ff00', '#ff00e1', '#9c0000'];
+	var secondaryColors = ['#ff8a8a', '#a8c7ff', '#5d945c', '#b07c20', '#919191', '#cb9de3', '#ffc56e', '#cffffb', '#fafaa7', '#d9ffb0', '#fca7f2', '#b53e3e'];
+	var undoButtonRadius = 30;
+	var diceMargin = 7;
+	var diceWidth = 50;
+	var diceCornerRadius = 5;
+	var diceDotSize = 9;
 
 AWS.config.region = 'us-east-2'; // Region
 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
@@ -235,9 +235,11 @@ function addName(){
                     }else if(!host){
                         document.getElementById('preLobby').style.display = 'none';;
                         inLobby = true;
-                        inPreLobby = false;
+						inPreLobby = false;
+						document.getElementById('lobby').style.display = 'inline';
                         updateLobbyDisplay();
                     }else{
+						document.getElementById('lobby').style.display = 'inline';
                         updateLobbyDisplay();
                     }
                 });
@@ -451,7 +453,6 @@ function rejoinGame(){
 //this also calls initiateGameForPlayer() when appropriate
 function updateLobbyDisplay(){
     if(inLobby){
-        document.getElementById('lobby').style.display = 'inline';
         document.getElementById('lobbyNameDisplay').innerHTML = 'Lobby: ' + lobbyName;
 
         var params = {
