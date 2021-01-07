@@ -633,7 +633,7 @@ function initialWriteDBVariables(){
 }
 
 function updateDBVariables(){
-	var thingsToWrite = ['players', 'vertices', 'hexagon', 'devCards', 'roads', 'numOfTurns', 'beginingPlacement', 'robberPlacement', 'turn', 'dice1', 'dice2', 'largestArmy', 'longestRoad']
+	var thingsToWrite = ['players', 'vertices', 'hexagon', 'devCards', 'roads', 'numOfTurns', 'beginingPlacement', 'robberPlacement', 'turn', 'dice1', 'dice2', 'largestArmy', 'longestRoad', 'hostMapR']
 	var items = []
 	for(i in thingsToWrite){
 		items.push({
@@ -974,13 +974,21 @@ function updateResourceDisplay(){
 			devCardTD.innerHTML += 'Knights Used: ' + players[i].usedKnights + '<br>'
 			for(j in players[i].devCards){
 				if(players[i].devCards[j] > 0){
-					devCardTD.innerHTML += '<div onclick = "' + j + 'Used(' + turn + ')">' + devCardDisplayName[j] + players[i].devCards[j] + '</div>'
+					devCardTD.innerHTML += '<div onclick = "' + j + 'Used(' + playerNumber + ')">' + devCardDisplayName[j] + players[i].devCards[j] + '</div>'
 				}else{}
 			}
 		}else{
 			var usedKnightsTD = document.querySelector('#p' + i + ' > tbody > tr > .usedKnights');
 			usedKnightsTD.innerHTML = '';
 			usedKnightsTD.innerHTML += 'Knights Used: ' + players[i].usedKnights + '<br>'
+
+			var numOfDevCardsTD = document.querySelector('#p' + i + ' > tbody > tr > .numOfDevCards');
+			numOfDevCardsTD.innerHTML = '';
+			var numOfDevCards = 0;
+			for(j in players[i].devCards){
+				numOfDevCards += players[i].devCards[j]
+			}
+			numOfDevCardsTD.innerHTML += 'Number of Development Cards: ' + numOfDevCards + '<br>'
 		}
 
 		var awardsTD = document.querySelector('#p' + i + ' > tbody > tr > .awards');
@@ -1026,10 +1034,11 @@ function updateResourceDisplay(){
 
 
 	if(playerNumber == turn){
-		document.getElementById('nextTurnButton').innerHTML = 'Next Turn';
 		document.getElementById('nextTurnButton').style.visibility = 'visible';
+		document.getElementById('tradeButton').style.visibility = 'visible';
 	}else{
 		document.getElementById('nextTurnButton').style.visibility = 'hidden';
+		document.getElementById('tradeButton').style.visibility = 'hidden';
 	}
 
 	setTimeout(resetColors,700);
@@ -1809,6 +1818,7 @@ function knightUsed(owner){
 
 function VPUsed(){}
 
+
 function roadBuildingUsed(owner){
 	if(owner == turn){
 		if(confirm('Are you sure you want to use your road building card?')){
@@ -1988,6 +1998,10 @@ function makePlayerDisplay(){
 					<td class = 'playerName' style = 'text-align: left;'>` + players[i].name + `</td>
 					<td class = 'playerVP' style = 'text-align: right;'> VP: 0 </td>
 				<tr>
+
+				<tr>
+					<td class = 'numOfDevCards' style = 'text-align: left'></td>
+				</tr>
 
 				<tr>
 					<td class = 'usedKnights' style = 'text-align: left'></td>
