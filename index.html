@@ -78,7 +78,7 @@
 		Trade with:
 		<select id = 'people' onchange="updateTradePage('both')"></select><br><br>
 
-		<input type ="number" id = "traderNumber" onchange="changePortNumberForTrade()" min="0" max = '9' value="0" onKeyDown="return false"/>
+		<input type ="number" id = "traderNumber" onchange="changePortNumberForTrade()" min="0" max = '9' value="0"/>
 		of my
 		<select id="traderTypes" onchange="updateTradePage('traderNum')">
 			<option value = 'wool'>wool</option>
@@ -89,7 +89,7 @@
 		</select><br><br>
 
 		for
-		<input type ="number" id = "tradeeNumber" min="0" max = '9' value="0" onKeyDown="return false"/>
+		<input type ="number" id = "tradeeNumber" min="0" max = '9' value="0"/>
 		<select id="tradeeTypes" onchange="updateTradePage('tradeeNum')">
 			<option value = 'grain'>grain</option>
 			<option value = 'wood'>wood</option>
